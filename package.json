@@ -1,0 +1,24 @@
+{
+  "name": "@endro/journals-core",
+  "version": "0.1.0",
+  "description": "Federated Journalism",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Lisk",
+    "Node.js",
+    "blockchain"
+  ],
+  "author": "Journals",
+  "license": "GPL-3.0",
+  "dependencies": {
+    "dotenv": "8.2.0",
+    "lisk-sdk": "5.1.0"
+  },
+  "bugs": {
+    "url": "https://github.com/endrohq/journals-core/issues"
+  },
+  "homepage": "https://github.com/endrohq/journals-core/issues#readme"
+}
