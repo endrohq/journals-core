@@ -5,7 +5,8 @@ const {
 	Application,
 	utils,
 	configDevnet,
-	genesisBlockDevnet
+	genesisBlockDevnet,
+	HTTPAPIPlugin
 } = require('lisk-sdk');
 
 
@@ -13,6 +14,15 @@ const appConfig = utils.objects.mergeDeep({}, configDevnet, {
 	label: 'journals',
 	genesisConfig: {
 		communityIdentifier: 'LSK'
+	},
+	network: {
+		port: 8080
+	},
+	plugins: {
+		httpApi: {
+			port: 4000,
+			whiteList: []
+		}
 	},
 	rpc: {
 		enable: true,
@@ -23,9 +33,11 @@ const appConfig = utils.objects.mergeDeep({}, configDevnet, {
 
 const app = Application.defaultApplication(genesisBlockDevnet, appConfig);
 
+app.registerPlugin(HTTPAPIPlugin);
+
 app
 	.run()
-	.then(() => app.logger.info('Arcado node has started'))
+	.then(() => app.logger.info('Journals node has started'))
 	.catch(error => {
 		console.error('Faced error in application', error);
 		process.exit(0);
