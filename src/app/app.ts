@@ -6,7 +6,6 @@ export const getApplication = (
 	genesisBlock: Record<string, unknown>,
 	config: PartialApplicationConfig,
 ): Application => {
-
 	const appConfig = utils.objects.mergeDeep({}, config, {
 		network: {
 			port: 8080
