@@ -2,13 +2,13 @@ export const CHAIN_STATE_HELLO_COUNTER = "hello:helloCounter";
 
 export const eventSchema = {
     type: "object",
-    required: ["id", "name", "description", "createdBy"],
+    required: ["id", "title", "description", "createdBy"],
     properties: {
         id: {
             dataType: "string",
             fieldNumber: 1,
         },
-        name: {
+        title: {
             dataType: "string",
             fieldNumber: 2,
         },
@@ -38,13 +38,6 @@ export const eventsSchema = {
 };
 
 export const createEventSchema = {
-    $id: "lisk/hello/counter",
-    type: "object",
-    required: ["helloCounter"],
-    properties: {
-        helloCounter: {
-            dataType: "uint32",
-            fieldNumber: 1,
-        },
-    },
+    $id: "journals/events/create",
+    ...eventSchema
 };

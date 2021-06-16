@@ -1,7 +1,7 @@
 import {BaseAsset} from "lisk-sdk";
 import {CREATE_EVENT_ASSET_ID} from "../constants";
 import {createEventSchema} from "../schemas";
-import {getAllEvents, setEvents} from "./helpers";
+import {getAllEvents, setEvents} from "../helpers";
 
 export class CreateEventAsset extends BaseAsset {
     id = CREATE_EVENT_ASSET_ID;
@@ -17,7 +17,7 @@ export class CreateEventAsset extends BaseAsset {
 
         const event = {
             id: asset.id,
-            name: asset.name,
+            title: asset.title,
             description: asset.description,
             createdBy: sender.address
         }

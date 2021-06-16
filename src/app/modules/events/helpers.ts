@@ -1,13 +1,32 @@
 import {codec} from "lisk-sdk";
-import {eventsSchema} from "../schemas";
+import {eventsSchema} from "./schemas";
 
 const CHAIN_STATE_EVENTS = 'journals:events'
 
 export const getAllEvents = async (stateStore) => {
+
     const registeredEventsBuffer = await stateStore.chain.get(CHAIN_STATE_EVENTS);
     if (!registeredEventsBuffer) {
         return [];
     }
+
+
+    const decodedEvents = codec.decode(
+        eventsSchema,
+        registeredEventsBuffer
+    );
+
+    // @ts-ignore
+    return decodedEvents.events;
+};
+
+export const getAllEventsAsJson = async (dataAccess) => {
+
+    const registeredEventsBuffer = await dataAccess.getChainState(CHAIN_STATE_EVENTS);
+    if (!registeredEventsBuffer) {
+        return [];
+    }
+
 
     const decodedEvents = codec.decode(
         eventsSchema,
@@ -29,3 +48,5 @@ export const setEvents = async (stateStore, events) => {
         codec.encode(eventsSchema, sortedEvents)
     );
 };
+
+
