@@ -1,3 +1,5 @@
+export const CHAIN_STATE_HELLO_COUNTER = 'hello:helloCounter';
+
 export const eventSchema = {
 	type: 'object',
 	required: ['title', 'description', 'createdBy'],
@@ -21,7 +23,7 @@ export const eventSchema = {
 	},
 };
 
-export const eventsSchema = {
+export const treasurySchema = {
 	$id: 'journals/events',
 	type: 'object',
 	required: ['events'],
@@ -34,7 +36,7 @@ export const eventsSchema = {
 	},
 };
 
-export const createEventSchema = {
+export const subscribeSchema = {
 	$id: 'journals/events/create',
 	...eventSchema,
 };

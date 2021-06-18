@@ -37,6 +37,23 @@ export const getAllEventsAsJson = async (dataAccess) => {
     return decodedEvents.events;
 };
 
+export const findOneAsJson = async (id: string, dataAccess) => {
+
+    const registeredEventsBuffer = await dataAccess.getChainState(CHAIN_STATE_EVENTS);
+    if (!registeredEventsBuffer) {
+        return [];
+    }
+
+
+    const decodedEvents = codec.decode(
+        eventsSchema,
+        registeredEventsBuffer
+    );
+
+    // @ts-ignore
+    return decodedEvents.events.find(item => item.id === id);
+};
+
 export const setEvents = async (stateStore, events) => {
 
     const sortedEvents = {

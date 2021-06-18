@@ -1,7 +1,7 @@
 import { BaseModule }  from "lisk-sdk"
 
 import { CreateEventAsset }  from "./transactions/create_event"
-import {getAllEventsAsJson} from "./helpers";
+import {getAllEventsAsJson, findOneAsJson} from "./helpers";
 
 export class EventModule extends BaseModule {
     name = "event";
@@ -24,6 +24,7 @@ export class EventModule extends BaseModule {
     };
     transactionAssets = [new CreateEventAsset()];
     actions = {
-        getAll: async () => getAllEventsAsJson(this._dataAccess),
+        find: async () => getAllEventsAsJson(this._dataAccess),
+        findOne: async (props: Record<string, any>) => findOneAsJson(props.id, this._dataAccess)
     }
 }
