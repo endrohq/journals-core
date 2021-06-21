@@ -1,69 +1,39 @@
-import {codec} from "lisk-sdk";
-import {eventsSchema} from "./schemas";
+import { codec } from 'lisk-sdk';
+import { eventsSchema } from './schemas';
+import { CHAIN_STATE_EVENTS } from './constants';
 
-const CHAIN_STATE_EVENTS = 'journals:events'
+export const getAllEvents = async stateStore => {
+	const registeredEventsBuffer = await stateStore.chain.get(CHAIN_STATE_EVENTS);
+	if (!registeredEventsBuffer) {
+		return [];
+	}
 
-export const getAllEvents = async (stateStore) => {
+	const decodedEvents = codec.decode(eventsSchema, registeredEventsBuffer);
 
-    const registeredEventsBuffer = await stateStore.chain.get(CHAIN_STATE_EVENTS);
-    if (!registeredEventsBuffer) {
-        return [];
-    }
-
-
-    const decodedEvents = codec.decode(
-        eventsSchema,
-        registeredEventsBuffer
-    );
-
-    // @ts-ignore
-    return decodedEvents.events;
+	// @ts-ignore
+	return decodedEvents.events;
 };
 
-export const getAllEventsAsJson = async (dataAccess) => {
+export const getAllEventsAsJson = async dataAccess => {
+	const registeredEventsBuffer = await dataAccess.getChainState(CHAIN_STATE_EVENTS);
+	if (!registeredEventsBuffer) {
+		return [];
+	}
 
-    const registeredEventsBuffer = await dataAccess.getChainState(CHAIN_STATE_EVENTS);
-    if (!registeredEventsBuffer) {
-        return [];
-    }
+	const decodedEvents = codec.decode(eventsSchema, registeredEventsBuffer);
 
-
-    const decodedEvents = codec.decode(
-        eventsSchema,
-        registeredEventsBuffer
-    );
-
-    // @ts-ignore
-    return decodedEvents.events;
+	// @ts-ignore
+	return decodedEvents.events;
 };
 
 export const findOneAsJson = async (id: string, dataAccess) => {
+	const registeredEventsBuffer = await dataAccess.getChainState(CHAIN_STATE_EVENTS);
+	if (!registeredEventsBuffer) {
+		return [];
+	}
 
-    const registeredEventsBuffer = await dataAccess.getChainState(CHAIN_STATE_EVENTS);
-    if (!registeredEventsBuffer) {
-        return [];
-    }
+	const decodedEvents = codec.decode(eventsSchema, registeredEventsBuffer);
 
-
-    const decodedEvents = codec.decode(
-        eventsSchema,
-        registeredEventsBuffer
-    );
-
-    // @ts-ignore
-    return decodedEvents.events.find(item => item.id === id);
+	// @ts-ignore
+	return decodedEvents.events.find(item => item.id === id);
 };
-
-export const setEvents = async (stateStore, events) => {
-
-    const sortedEvents = {
-        events: events.sort((a, b) => a.id.compare(b.id)),
-    };
-
-    await stateStore.chain.set(
-        CHAIN_STATE_EVENTS,
-        codec.encode(eventsSchema, sortedEvents)
-    );
-};
-
-

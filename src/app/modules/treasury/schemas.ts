@@ -1,42 +1,44 @@
 export const CHAIN_STATE_HELLO_COUNTER = 'hello:helloCounter';
 
-export const eventSchema = {
+export const subscriptionSchema = {
 	type: 'object',
-	required: ['title', 'description', 'createdBy'],
+	required: [],
 	properties: {
 		id: {
 			dataType: 'string',
 			fieldNumber: 1,
 		},
-		title: {
-			dataType: 'string',
+		address: {
+			dataType: 'bytes',
 			fieldNumber: 2,
+			minLength: 20,
+			maxLength: 20,
 		},
-		description: {
-			dataType: 'string',
+		expiresAt: {
+			dataType: 'uint32',
 			fieldNumber: 3,
 		},
-		createdBy: {
-			dataType: 'string',
+		startsAt: {
+			dataType: 'uint32',
 			fieldNumber: 4,
 		},
 	},
 };
 
-export const treasurySchema = {
-	$id: 'journals/events',
+export const subscriptionModuleSchema = {
+	$id: 'journals/subscriptions',
 	type: 'object',
-	required: ['events'],
+	required: ['subscriptions'],
 	properties: {
-		events: {
+		subscriptions: {
 			type: 'array',
 			fieldNumber: 1,
-			items: eventSchema,
+			items: subscriptionSchema,
 		},
 	},
 };
 
 export const subscribeSchema = {
 	$id: 'journals/events/create',
-	...eventSchema,
+	...subscriptionSchema,
 };

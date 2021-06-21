@@ -1,5 +1,5 @@
 import { codec } from 'lisk-sdk';
-import { treasurySchema } from './schemas';
+import { subscriptionModuleSchema } from './schemas';
 import { CHAIN_STATE_SUBSCRIPTIONS, CHAIN_STATE_TREASURY } from './constants';
 import { Subscription } from './types';
 
@@ -8,11 +8,10 @@ export const getAllSubscriptions = async stateStore => {
 	if (!registeredTreasuryBuffer) {
 		return [];
 	}
-
-	const decodedSubscriptions = codec.decode(treasurySchema, registeredTreasuryBuffer);
+	const decodedSubscriptions = codec.decode(subscriptionModuleSchema, registeredTreasuryBuffer);
 
 	// @ts-ignore
-	return decodedSubscriptions.treasury;
+	return decodedSubscriptions.subscriptions;
 };
 
 export const getTreasuryAsJson = async dataAccess => {
@@ -21,29 +20,33 @@ export const getTreasuryAsJson = async dataAccess => {
 		return [];
 	}
 
-	const decodedSubscriptions = codec.decode(treasurySchema, registeredSubscriptionsBuffer);
+	const decodedSubscriptions = codec.decode(
+		subscriptionModuleSchema,
+		registeredSubscriptionsBuffer,
+	);
 
 	// @ts-ignore
 	return decodedSubscriptions.subscriptions;
 };
 
-export const getSubscriptionAsJson = async (dataAccess, address) => {
+export const getSubscriptionsAsJson = async (dataAccess, address) => {
 	const registeredSubscriptionsBuffer = await dataAccess.getChainState(CHAIN_STATE_SUBSCRIPTIONS);
 	if (!registeredSubscriptionsBuffer) {
 		return [];
 	}
-
-	const { subscriptions = [] } = codec.decode(treasurySchema, registeredSubscriptionsBuffer);
-	return subscriptions.find((item: Subscription) => item.address === address);
+	const { subscriptions = [] } = codec.decode(
+		subscriptionModuleSchema,
+		registeredSubscriptionsBuffer,
+	);
+	return subscriptions.filter(
+		(item: Subscription) => Buffer.from(item?.address).toString('hex') === address,
+	);
 };
 
 export const setSubscriptions = async (stateStore, subscriptions) => {
-	const sortedSubscriptions = {
-		subscriptions: subscriptions.sort((a, b) => a.id.compare(b.id)),
-	};
-
+	console.log(subscriptions);
 	await stateStore.chain.set(
 		CHAIN_STATE_SUBSCRIPTIONS,
-		codec.encode(treasurySchema, sortedSubscriptions),
+		codec.encode(subscriptionModuleSchema, subscriptions),
 	);
 };

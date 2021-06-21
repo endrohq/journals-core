@@ -1,4 +1,6 @@
-export interface CreateSubscriptionAssetContext {}
+export interface CreateSubscriptionAssetContext {
+	id: string;
+}
 
 export interface TokenAccount {
 	token: {
