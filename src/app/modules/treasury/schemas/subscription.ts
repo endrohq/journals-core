@@ -1,5 +1,3 @@
-export const CHAIN_STATE_HELLO_COUNTER = 'hello:helloCounter';
-
 export const subscriptionSchema = {
 	type: 'object',
 	required: [],
@@ -39,6 +37,6 @@ export const subscriptionModuleSchema = {
 };
 
 export const subscribeSchema = {
-	$id: 'journals/events/create',
+	$id: 'journals/treasury/subscribe',
 	...subscriptionSchema,
 };

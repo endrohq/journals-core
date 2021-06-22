@@ -6,7 +6,7 @@ import {
 	SUBSCRIPTION_FEE,
 	TREASURY_ADDRESS,
 } from '../constants';
-import { subscribeSchema, subscriptionModuleSchema } from '../schemas';
+import { subscribeSchema, subscriptionModuleSchema } from '../schemas/subscription';
 import { CreateSubscriptionAssetContext } from '../types';
 import { getAllSubscriptions } from '../helpers';
 

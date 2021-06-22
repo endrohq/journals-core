@@ -1,6 +1,11 @@
 import { codec } from 'lisk-sdk';
-import { subscriptionModuleSchema } from './schemas';
-import { CHAIN_STATE_SUBSCRIPTIONS, CHAIN_STATE_TREASURY } from './constants';
+import { subscriptionModuleSchema } from './schemas/subscription';
+import { supportEventAssetSchema } from './schemas/support_event';
+import {
+	CHAIN_STATE_SUBSCRIPTIONS,
+	CHAIN_STATE_TREASURY,
+	CHAIN_STATE_SUPPORTED_EVENTS,
+} from './constants';
 import { Subscription } from './types';
 
 export const getAllSubscriptions = async stateStore => {
@@ -44,9 +49,20 @@ export const getSubscriptionsAsJson = async (dataAccess, address) => {
 };
 
 export const setSubscriptions = async (stateStore, subscriptions) => {
-	console.log(subscriptions);
 	await stateStore.chain.set(
 		CHAIN_STATE_SUBSCRIPTIONS,
 		codec.encode(subscriptionModuleSchema, subscriptions),
 	);
+};
+
+export const getAllPickedEvents = async stateStore => {
+	const registeredPickedEventsBuffer = await stateStore.chain.get(CHAIN_STATE_SUPPORTED_EVENTS);
+	if (!registeredPickedEventsBuffer) {
+		return [];
+	}
+
+	const decodedEvents = codec.decode(supportEventAssetSchema, registeredPickedEventsBuffer);
+
+	// @ts-ignore
+	return decodedEvents.events;
 };

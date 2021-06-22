@@ -2,10 +2,8 @@ export interface CreateSubscriptionAssetContext {
 	id: string;
 }
 
-export interface TokenAccount {
-	token: {
-		balance: bigint;
-	};
+export interface PickEventAssetContext {
+	eventId: string;
 }
 
 export interface Subscription {
