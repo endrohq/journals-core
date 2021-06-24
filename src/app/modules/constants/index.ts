@@ -1,5 +1,8 @@
-// SUBSCRIBE
+// EVENTS
+export const CREATE_EVENT_ASSET_ID = 0;
+export const CHAIN_STATE_EVENTS = 'journals:events';
 
+// SUBSCRIBE
 export const SUBSCRIBE_ASSET_ID = 0;
 export const SUBSCRIPTION_PERIOD_IN_BLOCKS = 50;
 export const SUBSCRIPTION_FEE = BigInt(1000000000);

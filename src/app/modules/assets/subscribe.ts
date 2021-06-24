@@ -6,9 +6,12 @@ import {
 	SUBSCRIPTION_FEE,
 	TREASURY_ADDRESS,
 } from '../constants';
-import { subscribeSchema, subscriptionModuleSchema } from '../schemas/subscription';
-import { CreateSubscriptionAssetContext } from '../types';
-import { getAllSubscriptions } from '../helpers';
+import { subscribeSchema, subscriptionStateSchema } from '../schemas/treasury';
+import { getChainStateByStateStore } from '../utils/chain.utils';
+
+interface CreateSubscriptionAssetContext {
+	id: string;
+}
 
 export class Subscribe extends BaseAsset {
 	id = SUBSCRIBE_ASSET_ID;
@@ -30,11 +33,16 @@ export class Subscribe extends BaseAsset {
 			expiresAt: currentHeight + SUBSCRIPTION_PERIOD_IN_BLOCKS,
 		};
 
-		const subscriptions = await getAllSubscriptions(stateStore);
+		const { subscriptions = [] } = await getChainStateByStateStore(
+			stateStore,
+			CHAIN_STATE_SUBSCRIPTIONS,
+			subscriptionStateSchema,
+		);
+
 		subscriptions.push(subscription);
 		await stateStore.chain.set(
 			CHAIN_STATE_SUBSCRIPTIONS,
-			codec.encode(subscriptionModuleSchema, { subscriptions }),
+			codec.encode(subscriptionStateSchema, { subscriptions }),
 		);
 
 		const accountBalance = await reducerHandler.invoke<bigint>('token:getBalance', {
