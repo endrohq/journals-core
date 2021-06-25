@@ -18,9 +18,11 @@ export class SupportEvent extends BaseAsset {
 		asset,
 		transaction,
 	}: ApplyAssetContext<SupportedEventAssetContext>): Promise<void> {
+		const currentHeight = stateStore.chain.lastBlockHeaders[0].height;
 		const supportedEvent = {
 			eventId: asset.eventId,
 			address: transaction.senderAddress,
+			height: currentHeight,
 		};
 
 		const { supportedEvents = [] } = await getChainStateByStateStore(

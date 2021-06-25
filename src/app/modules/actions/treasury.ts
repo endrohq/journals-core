@@ -3,8 +3,9 @@ import { CHAIN_STATE_SUBSCRIPTIONS, CHAIN_STATE_SUPPORTED_EVENTS } from '../cons
 import { Subscription, SupportedEvent } from '../typings';
 import { getChainStateByDataAccess } from '../utils/chain.utils';
 import { BaseModuleDataAccess } from 'lisk-framework/dist-node/types';
+import { findEventsByIds } from './events';
 
-const getSubscriptions = async (dataAccess, address) => {
+export const getSubscriptions = async (dataAccess: BaseModuleDataAccess, address: string) => {
 	const { subscriptions = [] } = await getChainStateByDataAccess(
 		dataAccess,
 		CHAIN_STATE_SUBSCRIPTIONS,
@@ -15,7 +16,11 @@ const getSubscriptions = async (dataAccess, address) => {
 	);
 };
 
-const hasSupportedEvent = async (dataAccess, address, eventId) => {
+export const hasSupportedEvent = async (
+	dataAccess: BaseModuleDataAccess,
+	address: string,
+	eventId: string,
+) => {
 	const { supportedEvents = [] } = await getChainStateByDataAccess(
 		dataAccess,
 		CHAIN_STATE_SUPPORTED_EVENTS,
@@ -30,19 +35,12 @@ const hasSupportedEvent = async (dataAccess, address, eventId) => {
 	return !!support;
 };
 
-const getEventsForCurrentRound = async dataAccess => {
-	const { supportedEvents = [] } = await getChainStateByDataAccess(
-		dataAccess,
-		CHAIN_STATE_SUPPORTED_EVENTS,
-		supportedEventStateSchema,
-	);
-	return supportedEvents;
+export const getEventsForCurrentRound = async (dataAccess: BaseModuleDataAccess) => {
+	const [{ supportedEvents = [] }, blockHeader] = await Promise.all([
+		getChainStateByDataAccess(dataAccess, CHAIN_STATE_SUPPORTED_EVENTS, supportedEventStateSchema),
+		dataAccess.getLastBlockHeader(),
+	]);
+	console.log(blockHeader.height);
+	const eventIds = supportedEvents.map(item => item.eventId);
+	return findEventsByIds(dataAccess, eventIds);
 };
-
-export const getActions = (dataAccess: BaseModuleDataAccess) => ({
-	getSubscriptions: async ({ address }: Record<string, any>) =>
-		getSubscriptions(dataAccess, address),
-	hasSupportedEvent: async ({ address, eventId }: Record<string, any>) =>
-		hasSupportedEvent(dataAccess, address, eventId),
-	getEventsForCurrentRound: async () => getEventsForCurrentRound(dataAccess),
-});

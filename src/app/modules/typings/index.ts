@@ -8,3 +8,10 @@ export interface SupportedEvent {
 	eventId: string;
 	address: string;
 }
+
+export interface NewsEvent {
+	id: string;
+	title: string;
+	description: string;
+	createdBy: string;
+}

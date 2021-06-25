@@ -59,6 +59,10 @@ export const supportEventSchema = {
 			minLength: 20,
 			maxLength: 20,
 		},
+		blockHeight: {
+			dataType: 'uint32',
+			fieldNumber: 3,
+		},
 	},
 };
 
