@@ -40,9 +40,11 @@ export class Subscribe extends BaseAsset {
 		);
 
 		subscriptions.push(subscription);
+		const sortedSubscriptions = subscriptions.sort((a, b) => a.startsAt < b.startsAt);
+
 		await stateStore.chain.set(
 			CHAIN_STATE_SUBSCRIPTIONS,
-			codec.encode(subscriptionStateSchema, { subscriptions }),
+			codec.encode(subscriptionStateSchema, { subscriptions: sortedSubscriptions }),
 		);
 
 		const accountBalance = await reducerHandler.invoke<bigint>('token:getBalance', {

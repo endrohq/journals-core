@@ -15,3 +15,7 @@ export const CHAIN_STATE_SUBSCRIPTIONS = 'journals:subscriptions';
 
 export const SUPPORT_EVENT_ASSET_ID = 1;
 export const CHAIN_STATE_SUPPORTED_EVENTS = 'journals:supportedEvents';
+
+// TREASURY
+
+export const TREASURY_BLOCK_WINDOW_SIZE = 100;

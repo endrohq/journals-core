@@ -14,4 +14,5 @@ export interface NewsEvent {
 	title: string;
 	description: string;
 	createdBy: string;
+	supporters: number;
 }
