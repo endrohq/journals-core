@@ -1,7 +1,12 @@
 import { BaseModule } from 'lisk-sdk';
 
 import { Subscribe } from './assets/subscribe';
-import { getSubscriptions, hasSupportedEvent, getSnapshotByRound } from './actions/treasury';
+import {
+	getSubscriptions,
+	hasSupportedEvent,
+	getSnapshotByRound,
+	hasActiveSubscription,
+} from './actions/treasury';
 import { SupportEvent } from './assets/support_event';
 
 export class TreasuryModule extends BaseModule {
@@ -12,6 +17,8 @@ export class TreasuryModule extends BaseModule {
 	actions = {
 		getSubscriptions: async ({ address }: Record<string, any>) =>
 			getSubscriptions(this._dataAccess, address),
+		hasActiveSubscription: async ({ address }: Record<string, any>) =>
+			hasActiveSubscription(this._dataAccess, address),
 		hasSupportedEvent: async ({ address, eventId }: Record<string, any>) =>
 			hasSupportedEvent(this._dataAccess, address, eventId),
 		getSnapshotByRound: async () => getSnapshotByRound(this._dataAccess),

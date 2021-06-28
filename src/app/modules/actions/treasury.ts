@@ -23,6 +23,18 @@ export const getSubscriptions = async (dataAccess: BaseModuleDataAccess, address
 	);
 };
 
+export const hasActiveSubscription = async (dataAccess: BaseModuleDataAccess, address: string) => {
+	const [{ subscriptions = [] }, { height }] = await Promise.all([
+		getChainStateByDataAccess(dataAccess, CHAIN_STATE_SUBSCRIPTIONS, subscriptionStateSchema),
+		dataAccess.getLastBlockHeader(),
+	]);
+	const activeSubscription = subscriptions.find(
+		(item: Subscription) =>
+			Buffer.from(item?.address).toString('hex') === address && item.expiresAt > height,
+	);
+	return !!activeSubscription;
+};
+
 export const hasSupportedEvent = async (
 	dataAccess: BaseModuleDataAccess,
 	address: string,
@@ -42,6 +54,25 @@ export const hasSupportedEvent = async (
 	return !!support;
 };
 
+export const getSupportedEvents = async (
+	dataAccess: BaseModuleDataAccess,
+): Promise<SupportedEvent[]> => {
+	const response = await getChainStateByDataAccess(
+		dataAccess,
+		CHAIN_STATE_SUPPORTED_EVENTS,
+		supportedEventStateSchema,
+	);
+	return response.supportedEvents || ([] as SupportedEvent[]);
+};
+
+export const getSupportersCountByEventId = async (
+	dataAccess: BaseModuleDataAccess,
+	eventId: string,
+) => {
+	const supportedEvents = await getSupportedEvents(dataAccess);
+	return supportedEvents?.filter(event => event?.eventId === eventId)?.length || 0;
+};
+
 export const getSnapshotByRound = async (dataAccess: BaseModuleDataAccess) => {
 	let account;
 	let holdings = BigInt(0);
@@ -53,8 +84,8 @@ export const getSnapshotByRound = async (dataAccess: BaseModuleDataAccess) => {
 		}
 	} catch (e) {}
 
-	const [{ supportedEvents = [] }, blockHeader] = await Promise.all([
-		getChainStateByDataAccess(dataAccess, CHAIN_STATE_SUPPORTED_EVENTS, supportedEventStateSchema),
+	const [supportedEvents, blockHeader] = await Promise.all([
+		getSupportedEvents(dataAccess),
 		dataAccess.getLastBlockHeader(),
 	]);
 
@@ -73,6 +104,7 @@ export const getSnapshotByRound = async (dataAccess: BaseModuleDataAccess) => {
 	return {
 		round: Math.floor(blockHeader.height / TREASURY_BLOCK_WINDOW_SIZE),
 		holdings: holdings.toString(),
+		subscriptionCount: supportedEvents?.length || 0,
 		events: events.map(event => ({
 			...event,
 			supporters: eventSupportersMap[event.id],
@@ -100,19 +132,15 @@ const getQuadraticFunding = (
 	}
 
 	Object.keys(eventSupportCount).forEach(eventId => {
-		console.log(eventSupportCount[eventId]);
-		let sumAmount = Math.sqrt(eventSupportCount[eventId]);
-		console.log(sumAmount);
+		const arr = Array(eventSupportCount[eventId]).fill(Math.sqrt(1));
+		let sumAmount = arr.reduce((a, b) => a + b, 0);
 		// Square the total value of each summed grants contributions
 		sumAmount *= sumAmount;
 		result[eventId] = sumAmount;
 		summed += sumAmount;
 	});
-	console.log(result);
 	// Setup a divisor based on available match
 	let divisor = summed !== 0 ? totalAmount / summed : 0;
-
-	console.log(divisor);
 	// Multiply matched values with divisor to get match amount in range of available funds
 	Object.keys(eventSupportCount).forEach(eventId => {
 		result[eventId] *= divisor;

@@ -3,6 +3,7 @@ import { CHAIN_STATE_EVENTS } from '../constants';
 import { NewsEvent } from '../typings';
 import { BaseModuleDataAccess } from 'lisk-framework/dist-node/types';
 import { getChainStateByDataAccess } from '../utils/chain.utils';
+import { getSupportersCountByEventId } from './treasury';
 
 export const findEvents = async (dataAccess: BaseModuleDataAccess): Promise<NewsEvent[]> => {
 	const { events = [] } = await getChainStateByDataAccess(
@@ -19,11 +20,13 @@ export const findEventsByIds = async (dataAccess: BaseModuleDataAccess, eventIds
 };
 
 export const findEventById = async (id: string, dataAccess: BaseModuleDataAccess) => {
-	const { events = [] } = await getChainStateByDataAccess(
-		dataAccess,
-		CHAIN_STATE_EVENTS,
-		eventsSchema,
-	);
-	// @ts-ignore
-	return events.find(item => item.id === id);
+	const [events, supporters] = await Promise.all([
+		findEvents(dataAccess),
+		getSupportersCountByEventId(dataAccess, id),
+	]);
+
+	const event = events.find(item => item.id === id);
+	if (!event) return undefined;
+	event.supporters = supporters;
+	return event;
 };
