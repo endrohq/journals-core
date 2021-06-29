@@ -6,7 +6,8 @@ export interface Subscription {
 
 export interface SupportedEvent {
 	eventId: string;
-	address: string;
+	height: number;
+	address: Buffer;
 }
 
 export interface NewsEvent {

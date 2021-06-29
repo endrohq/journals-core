@@ -11,6 +11,7 @@ import { getChainStateByDataAccess } from '../utils/chain.utils';
 import { BaseModuleDataAccess } from 'lisk-framework/dist-node/types';
 import { findEvents } from './events';
 import * as R from 'remeda';
+import { SubscriptionDTO } from './dto/SubscriptionDTO';
 
 export const getSubscriptions = async (dataAccess: BaseModuleDataAccess, address: string) => {
 	const { subscriptions = [] } = await getChainStateByDataAccess(
@@ -18,9 +19,9 @@ export const getSubscriptions = async (dataAccess: BaseModuleDataAccess, address
 		CHAIN_STATE_SUBSCRIPTIONS,
 		subscriptionStateSchema,
 	);
-	return subscriptions.filter(
-		(item: Subscription) => Buffer.from(item?.address).toString('hex') === address,
-	);
+	return subscriptions
+		.filter((item: Subscription) => Buffer.from(item?.address).toString('hex') === address)
+		.map(item => new SubscriptionDTO(item.id, item));
 };
 
 export const hasActiveSubscription = async (dataAccess: BaseModuleDataAccess, address: string) => {
@@ -62,7 +63,21 @@ export const getSupportedEvents = async (
 		CHAIN_STATE_SUPPORTED_EVENTS,
 		supportedEventStateSchema,
 	);
-	return response.supportedEvents || ([] as SupportedEvent[]);
+	return (response.supportedEvents || []) as SupportedEvent[];
+};
+
+export const getSupportedEventsByAddress = async (
+	dataAccess: BaseModuleDataAccess,
+	address: string,
+): Promise<SupportedEvent[]> => {
+	const response = await getChainStateByDataAccess(
+		dataAccess,
+		CHAIN_STATE_SUPPORTED_EVENTS,
+		supportedEventStateSchema,
+	);
+	const supportedEvents = (response.supportedEvents || []) as SupportedEvent[];
+	const addressBuffer = Buffer.from(address, 'hex');
+	return supportedEvents.filter(item => Buffer.compare(item.address, addressBuffer) === 0);
 };
 
 export const getSupportersCountByEventId = async (
@@ -102,7 +117,7 @@ export const getSnapshotByRound = async (dataAccess: BaseModuleDataAccess) => {
 	);
 
 	return {
-		round: Math.floor(blockHeader.height / TREASURY_BLOCK_WINDOW_SIZE),
+		round: Math.round(blockHeader.height / TREASURY_BLOCK_WINDOW_SIZE) + 1,
 		holdings: holdings.toString(),
 		subscriptionCount: supportedEvents?.length || 0,
 		events: events.map(event => ({

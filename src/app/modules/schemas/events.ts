@@ -1,6 +1,6 @@
 export const eventSchema = {
 	type: 'object',
-	required: ['id', 'title', 'description', 'createdBy'],
+	required: ['title', 'description', 'createdBy'],
 	properties: {
 		id: {
 			dataType: 'string',

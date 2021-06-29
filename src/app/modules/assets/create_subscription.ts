@@ -13,7 +13,7 @@ interface CreateSubscriptionAssetContext {
 	id: string;
 }
 
-export class Subscribe extends BaseAsset {
+export class Create_subscription extends BaseAsset {
 	id = SUBSCRIBE_ASSET_ID;
 	name = 'subscribe';
 	schema = subscribeSchema;
@@ -22,12 +22,11 @@ export class Subscribe extends BaseAsset {
 		transaction,
 		stateStore,
 		reducerHandler,
-		asset,
 	}: ApplyAssetContext<CreateSubscriptionAssetContext>): Promise<void> {
 		const sender = await stateStore.account.get(transaction.senderAddress);
 		const currentHeight = stateStore.chain.lastBlockHeaders[0].height;
 		const subscription = {
-			id: asset.id,
+			id: (transaction.id as Buffer).toString('hex'),
 			address: sender.address,
 			startsAt: currentHeight,
 			expiresAt: currentHeight + SUBSCRIPTION_PERIOD_IN_BLOCKS,

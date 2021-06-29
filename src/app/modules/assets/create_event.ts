@@ -9,9 +9,9 @@ export class CreateEvent extends BaseAsset {
 	name = 'createEvent';
 	schema = createEventSchema;
 
-	async apply({ asset, stateStore }: ApplyAssetContext<NewsEvent>): Promise<void> {
+	async apply({ asset, stateStore, transaction }: ApplyAssetContext<NewsEvent>): Promise<void> {
 		const event = {
-			id: asset.id,
+			id: (transaction.id as Buffer).toString('hex'),
 			title: asset.title,
 			description: asset.description,
 			createdBy: asset.createdBy,
