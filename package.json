@@ -1,5 +1,5 @@
 {
-	"name": "journals",
+	"name": "Journals",
 	"version": "0.1.0",
 	"description": "Federated Journalism",
 	"author": "tomploem",
@@ -19,17 +19,17 @@
 	},
 	"main": "dist/index.js",
 	"scripts": {
-		"lint": "../node_modules/.bin/eslint --ext .js,.ts .",
-		"lint:fix": "../node_modules/.bin/eslint --fix --ext .js,.ts .",
-		"format": "../node_modules/.bin/prettier --write '**/*'",
-		"prepack": "../node_modules/.bin/oclif-dev manifest && oclif-dev readme --multi --dir=docs/commands && npm shrinkwrap && npm prune --production && npm shrinkwrap",
+		"lint": "./.bin/eslint --ext .js,.ts .",
+		"lint:fix": "./.bin/eslint --fix --ext .js,.ts .",
+		"format": "./.bin/prettier --write '**/*'",
+		"prepack": "./.bin/oclif-dev manifest && oclif-dev readme --multi --dir=docs/commands && npm shrinkwrap && npm prune --production && npm shrinkwrap",
 		"prebuild": "if test -d dist; then rm -r dist; fi; rm -f tsconfig.tsbuildinfo; rm -f npm-shrinkwrap.json",
 		"start": "echo Run \\\\\\\"bin/run start\\\\\\\" to start the app",
-		"build": "../node_modules/.bin/tsc",
-		"test": "../node_modules/.bin/jest --passWithNoTests",
-		"test:coverage": "../node_modules/.bin/jest --passWithNoTests --coverage=true --coverage-reporters=text",
-		"test:ci": "../node_modules/.bin/jest --passWithNoTests --coverage=true --coverage-reporters=json --verbose",
-		"version": "../node_modules/.bin/oclif-dev readme --multi --dir=docs/commands && git add README.md docs",
+		"build": "./.bin/tsc",
+		"test": "./.bin/jest --passWithNoTests",
+		"test:coverage": "./.bin/jest --passWithNoTests --coverage=true --coverage-reporters=text",
+		"test:ci": "./.bin/jest --passWithNoTests --coverage=true --coverage-reporters=json --verbose",
+		"version": "./.bin/oclif-dev readme --multi --dir=docs/commands && git add README.md docs",
 		"prepublishOnly": "npm ci && npm run lint && npm run build"
 	},
 	"bin": {
@@ -85,11 +85,11 @@
 		}
 	},
 	"files": [
-		"/blockchain/bin",
+		"/bin",
 		"/npm-shrinkwrap.json",
 		"/oclif.manifest.json",
 		"/dist",
-		"/blockchain/config",
+		"/config",
 		"/docs"
 	],
 	"husky": {
