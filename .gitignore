@@ -43,3 +43,5 @@ config.local.json
 
 # Build Directory
 dist
+
+.secrets
