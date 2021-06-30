@@ -33,7 +33,7 @@ Session.vim
 
 # Config files
 sftp-config.json
-.secrets
+blockchain/.secrets
 
 # Coverage directory used by tools like istanbul
 .coverage/
