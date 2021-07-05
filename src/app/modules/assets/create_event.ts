@@ -13,7 +13,8 @@ export class CreateEvent extends BaseAsset {
 		const event = {
 			id: (transaction.id as Buffer).toString('hex'),
 			title: asset.title,
-			description: asset.description,
+			longitude: asset.longitude,
+			latitude: asset.latitude,
 			createdBy: asset.createdBy,
 		};
 

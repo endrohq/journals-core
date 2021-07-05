@@ -16,4 +16,11 @@ export interface NewsEvent {
 	description: string;
 	createdBy: string;
 	supporters: number;
+	longitude: number;
+	latitude: number;
+}
+
+export interface Location {
+	longitude: number;
+	latitude: number;
 }

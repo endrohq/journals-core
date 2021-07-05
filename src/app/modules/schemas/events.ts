@@ -1,6 +1,6 @@
 export const eventSchema = {
 	type: 'object',
-	required: ['title', 'description', 'createdBy'],
+	required: ['title', 'longitude', 'latitude', 'createdBy'],
 	properties: {
 		id: {
 			dataType: 'string',
@@ -10,13 +10,17 @@ export const eventSchema = {
 			dataType: 'string',
 			fieldNumber: 2,
 		},
-		description: {
-			dataType: 'string',
+		longitude: {
 			fieldNumber: 3,
+			dataType: 'string',
+		},
+		latitude: {
+			fieldNumber: 4,
+			dataType: 'string',
 		},
 		createdBy: {
 			dataType: 'bytes',
-			fieldNumber: 4,
+			fieldNumber: 5,
 			minLength: 20,
 			maxLength: 20,
 		},
