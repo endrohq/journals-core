@@ -15,6 +15,8 @@ export interface NewsEvent {
 	title: string;
 	description: string;
 	createdBy: string;
+	videoId: string;
+	labels: string[];
 	supporters: number;
 	longitude: number;
 	latitude: number;

@@ -16,6 +16,8 @@ export class CreateEvent extends BaseAsset {
 			longitude: asset.longitude,
 			latitude: asset.latitude,
 			createdBy: asset.createdBy,
+			labels: asset.labels,
+			videoId: asset.videoId,
 		};
 
 		const { events = [] } = await getChainStateByStateStore(

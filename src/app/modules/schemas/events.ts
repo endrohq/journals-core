@@ -1,6 +1,6 @@
 export const eventSchema = {
 	type: 'object',
-	required: ['title', 'longitude', 'latitude', 'createdBy'],
+	required: ['title', 'longitude', 'latitude', 'createdBy', 'videoId'],
 	properties: {
 		id: {
 			dataType: 'string',
@@ -23,6 +23,17 @@ export const eventSchema = {
 			fieldNumber: 5,
 			minLength: 20,
 			maxLength: 20,
+		},
+		videoId: {
+			fieldNumber: 6,
+			dataType: 'string',
+		},
+		labels: {
+			type: 'array',
+			fieldNumber: 7,
+			items: {
+				dataType: 'string',
+			},
 		},
 	},
 };
