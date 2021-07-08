@@ -1,5 +1,6 @@
 // EVENTS
 export const CREATE_EVENT_ASSET_ID = 0;
+export const PUBLISH_TO_EVENT_ASSET_ID = 1;
 export const CHAIN_STATE_EVENTS = 'journals:events';
 
 // SUBSCRIBE
