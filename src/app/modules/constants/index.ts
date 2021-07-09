@@ -5,7 +5,7 @@ export const CHAIN_STATE_EVENTS = 'journals:events';
 
 // SUBSCRIBE
 export const SUBSCRIBE_ASSET_ID = 0;
-export const SUBSCRIPTION_PERIOD_IN_BLOCKS = 50;
+export const SUBSCRIPTION_PERIOD_IN_BLOCKS = 100;
 export const SUBSCRIPTION_FEE = 2500000000;
 export const TREASURY_ADDRESS = 'a3b9b616f53864c20aca720bcbefec3586339c1d';
 
