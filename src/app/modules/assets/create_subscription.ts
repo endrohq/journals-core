@@ -6,30 +6,34 @@ import {
 	SUBSCRIPTION_FEE,
 	TREASURY_ADDRESS,
 } from '../constants';
-import { subscribeSchema, subscriptionStateSchema } from '../schemas/treasury';
+import { createSubscriptionSchema, subscriptionStateSchema } from '../schemas/treasury';
 import { getChainStateByStateStore } from '../utils/chain.utils';
 
 interface CreateSubscriptionAssetContext {
-	id: string;
+	amount: number;
 }
 
 export class Create_subscription extends BaseAsset {
 	id = SUBSCRIBE_ASSET_ID;
 	name = 'subscribe';
-	schema = subscribeSchema;
+	schema = createSubscriptionSchema;
 
 	async apply({
 		transaction,
 		stateStore,
 		reducerHandler,
+		asset,
 	}: ApplyAssetContext<CreateSubscriptionAssetContext>): Promise<void> {
+		const transactionHash = (transaction.id as Buffer).toString('hex');
 		const sender = await stateStore.account.get(transaction.senderAddress);
 		const currentHeight = stateStore.chain.lastBlockHeaders[0].height;
+
+		const currentRound = Math.floor(currentHeight / SUBSCRIPTION_PERIOD_IN_BLOCKS);
 		const subscription = {
-			id: (transaction.id as Buffer).toString('hex'),
+			id: transactionHash,
 			address: sender.address,
 			startsAt: currentHeight,
-			expiresAt: currentHeight + SUBSCRIPTION_PERIOD_IN_BLOCKS,
+			expiresAt: (currentRound + asset.amount) * SUBSCRIPTION_PERIOD_IN_BLOCKS,
 		};
 
 		const { subscriptions = [] } = await getChainStateByStateStore(
@@ -58,13 +62,14 @@ export class Create_subscription extends BaseAsset {
 				: BigInt(0);
 
 		if (subtractableBalance > BigInt(0)) {
+			const subscriptionCost = BigInt(SUBSCRIPTION_FEE * asset.amount);
 			await reducerHandler.invoke('token:debit', {
 				address: transaction.senderAddress,
-				amount: SUBSCRIPTION_FEE,
+				amount: subscriptionCost,
 			});
 			await reducerHandler.invoke('token:credit', {
 				address: Buffer.from(TREASURY_ADDRESS, 'hex'),
-				amount: SUBSCRIPTION_FEE,
+				amount: subscriptionCost,
 			});
 		}
 	}

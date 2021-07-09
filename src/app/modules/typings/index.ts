@@ -6,7 +6,7 @@ export interface Subscription {
 
 export interface SupportedEvent {
 	eventId: string;
-	height: number;
+	blockHeight: number;
 	address: Buffer;
 }
 
@@ -37,7 +37,7 @@ export interface NewsEvent {
 }
 
 export interface NewsEventDTO extends NewsEvent {
-	supporters: number;
+	treasury: NewsEventTreasury;
 	labelStats: Record<string, number>;
 }
 
@@ -59,6 +59,11 @@ export enum NewsHistoryTypes {
 export interface NewsEventMedia {
 	mediaId: string;
 	labels: string[];
+}
+
+export interface NewsEventTreasury {
+	supporters: number;
+	funding: number;
 }
 
 export interface NewsEventLocation {

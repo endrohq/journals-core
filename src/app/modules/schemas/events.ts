@@ -266,5 +266,43 @@ export const publishToEventSchema = {
 				},
 			},
 		},
+		statement: {
+			type: 'object',
+			fieldNumber: 4,
+			properties: {
+				text: {
+					dataType: 'string',
+					fieldNumber: 1,
+				},
+				entities: {
+					type: 'array',
+					fieldNumber: 2,
+					items: {
+						type: 'object',
+						properties: {
+							entity: {
+								fieldNumber: 1,
+								dataType: 'string',
+							},
+							entityType: {
+								fieldNumber: 2,
+								dataType: 'string',
+							},
+						},
+					},
+				},
+				verbs: {
+					type: 'array',
+					fieldNumber: 3,
+					items: {
+						dataType: 'string',
+					},
+				},
+			},
+		},
+		dateCreated: {
+			dataType: 'uint32',
+			fieldNumber: 5,
+		},
 	},
 };

@@ -25,9 +25,16 @@ export const subscriptionSchema = {
 	},
 };
 
-export const subscribeSchema = {
-	$id: 'journals/treasury/subscribe',
-	...subscriptionSchema,
+export const createSubscriptionSchema = {
+	$id: 'journals/treasury/createSubscription',
+	type: 'object',
+	required: ['amount'],
+	properties: {
+		amount: {
+			dataType: 'uint32',
+			fieldNumber: 1,
+		},
+	},
 };
 
 export const subscriptionStateSchema = {

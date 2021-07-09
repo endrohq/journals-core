@@ -3,8 +3,9 @@ import { supportedEventStateSchema, subscriptionStateSchema } from '../schemas/t
 import {
 	CHAIN_STATE_SUBSCRIPTIONS,
 	CHAIN_STATE_SUPPORTED_EVENTS,
+	SUBSCRIPTION_FEE,
+	SUBSCRIPTION_PERIOD_IN_BLOCKS,
 	TREASURY_ADDRESS,
-	TREASURY_BLOCK_WINDOW_SIZE,
 } from '../constants';
 import { NewsEvent, Subscription, SupportedEvent } from '../typings';
 import { getChainStateByDataAccess } from '../utils/chain.utils';
@@ -55,15 +56,21 @@ export const hasSupportedEvent = async (
 	return !!support;
 };
 
-export const getSupportedEvents = async (
+export const getSupportedEventsForRound = async (
 	dataAccess: BaseModuleDataAccess,
+	round: number,
 ): Promise<SupportedEvent[]> => {
-	const response = await getChainStateByDataAccess(
+	const { supportedEvents = [] } = await getChainStateByDataAccess(
 		dataAccess,
 		CHAIN_STATE_SUPPORTED_EVENTS,
 		supportedEventStateSchema,
 	);
-	return (response.supportedEvents || []) as SupportedEvent[];
+
+	const startsAt = (round - 1) * SUBSCRIPTION_PERIOD_IN_BLOCKS + 1;
+	const endsAt = round * SUBSCRIPTION_PERIOD_IN_BLOCKS;
+	return supportedEvents.filter(
+		(event: SupportedEvent) => event.blockHeight >= startsAt && event.blockHeight <= endsAt,
+	);
 };
 
 export const getSupportedEventsByAddress = async (
@@ -80,17 +87,16 @@ export const getSupportedEventsByAddress = async (
 	return supportedEvents.filter(item => Buffer.compare(item.address, addressBuffer) === 0);
 };
 
-export const getSupportersCountByEventId = async (
-	dataAccess: BaseModuleDataAccess,
-	eventId: string,
-) => {
-	const supportedEvents = await getSupportedEvents(dataAccess);
-	return supportedEvents?.filter(event => event?.eventId === eventId)?.length || 0;
-};
-
-export const getSnapshotByRound = async (dataAccess: BaseModuleDataAccess) => {
+export const getTreasuryContext = async (dataAccess: BaseModuleDataAccess) => {
 	let account;
 	let holdings = BigInt(0);
+
+	const [blockHeader, { subscriptions = [] }] = await Promise.all([
+		dataAccess.getLastBlockHeader(),
+		getChainStateByDataAccess(dataAccess, CHAIN_STATE_SUBSCRIPTIONS, subscriptionStateSchema),
+	]);
+
+	const currentRound = Math.floor(blockHeader.height / SUBSCRIPTION_PERIOD_IN_BLOCKS) + 1;
 
 	try {
 		account = await dataAccess.getAccountByAddress(Buffer.from(TREASURY_ADDRESS, 'hex'));
@@ -99,11 +105,9 @@ export const getSnapshotByRound = async (dataAccess: BaseModuleDataAccess) => {
 		}
 	} catch (e) {}
 
-	const [supportedEvents, blockHeader] = await Promise.all([
-		getSupportedEvents(dataAccess),
-		dataAccess.getLastBlockHeader(),
-	]);
+	const { funding: currentRoundFunds } = getFundingAmountForRound(currentRound, subscriptions);
 
+	const supportedEvents = await getSupportedEventsForRound(dataAccess, currentRound);
 	const eventIds = supportedEvents.map(item => item.eventId);
 	const events = await findEvents(dataAccess);
 
@@ -112,18 +116,62 @@ export const getSnapshotByRound = async (dataAccess: BaseModuleDataAccess) => {
 
 	// { [eventId]: BigInt }
 	const funding = getQuadraticFunding(
-		Number(transactions.convertBeddowsToLSK(`${account?.token?.balance || 0}`)),
+		Number(transactions.convertBeddowsToLSK(`${currentRoundFunds || 0}`)),
 		eventSupportersMap,
 	);
 
 	return {
-		round: Math.round(blockHeader.height / TREASURY_BLOCK_WINDOW_SIZE) + 1,
-		holdings: holdings.toString(),
+		events,
+		eventSupportersMap,
+		supportedEvents,
+		holdings,
+		funding,
+	};
+};
+
+export const getSnapshotByRound = async (dataAccess: BaseModuleDataAccess) => {
+	const [blockHeader, { subscriptions = [] }] = await Promise.all([
+		dataAccess.getLastBlockHeader(),
+		getChainStateByDataAccess(dataAccess, CHAIN_STATE_SUBSCRIPTIONS, subscriptionStateSchema),
+	]);
+
+	const currentRound = Math.floor(blockHeader.height / SUBSCRIPTION_PERIOD_IN_BLOCKS) + 1;
+
+	const {
+		events,
+		eventSupportersMap,
+		funding,
+		holdings,
+		supportedEvents,
+	} = await getTreasuryContext(dataAccess);
+
+	const rounds: any[] = [];
+
+	for (let i = 1; i <= 4; i++) {
+		const startsAt = (i - 1) * SUBSCRIPTION_PERIOD_IN_BLOCKS + 1;
+		const endsAt = i * SUBSCRIPTION_PERIOD_IN_BLOCKS;
+
+		const { contributors } = getFundingAmountForRound(i, subscriptions);
+		rounds.push({
+			startsAt,
+			endsAt,
+			contributors,
+		});
+	}
+
+	// const { funding: currentRoundFunds } = getFundingAmountForRound(currentRound, subscriptions);
+
+	return {
+		currentRound,
+		rounds,
+		treasuryFunds: holdings.toString(),
 		subscriptionCount: supportedEvents?.length || 0,
 		events: events.map(event => ({
 			...event,
-			supporters: eventSupportersMap[event.id],
-			funding: funding[event.id].toString(),
+			treasury: {
+				supporters: eventSupportersMap[event.id],
+				funding: funding[event.id].toString(),
+			},
 		})),
 	};
 };
@@ -135,6 +183,18 @@ const getEventSupportersMap = (events: NewsEvent[], eventIds: string[]): Record<
 	R.flatMapToObj(events, event => [
 		[String(event.id), getEventSupportersCount(event.id, eventIds)],
 	]);
+
+export const getTreasuryContextForEvent = async (
+	dataAccess: BaseModuleDataAccess,
+	eventId: string,
+) => {
+	const { eventSupportersMap, funding } = await getTreasuryContext(dataAccess);
+
+	return {
+		funding: funding[eventId],
+		supporters: eventSupportersMap[eventId],
+	};
+};
 
 const getQuadraticFunding = (
 	totalAmount: number,
@@ -162,4 +222,18 @@ const getQuadraticFunding = (
 	});
 
 	return result;
+};
+
+const getFundingAmountForRound = (round: number, subscriptions: Subscription[]) => {
+	const filtered = subscriptions.filter((item: Subscription) => {
+		const lastSubscriptionRound = Math.round(
+			Number(item.expiresAt) / SUBSCRIPTION_PERIOD_IN_BLOCKS,
+		);
+		return lastSubscriptionRound > round - 1;
+	});
+	const contributors = filtered?.length || 0;
+	return {
+		funding: contributors * SUBSCRIPTION_FEE,
+		contributors,
+	};
 };
